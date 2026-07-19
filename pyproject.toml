@@ -1,0 +1,109 @@
+[tool.poetry]
+name = "fastapi-template"
+version = "1.0.0"
+description = "Production-ready FastAPI template"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.14"
+
+# FastAPI
+fastapi = "^0.116.1"
+uvicorn = { extras = ["standard"], version = "^0.35.0" }
+
+# Configuration
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
+python-dotenv = "^1.1.1"
+
+# Database
+sqlalchemy = "^2.0.43"
+alembic = "^1.16.4"
+asyncpg = "^0.30.0"
+
+# Redis
+redis = "^6.4.0"
+
+# Authentication
+python-jose = { extras = ["cryptography"], version = "^3.5.0" }
+pwdlib = { extras = ["argon2"], version = "^0.2.1" }
+
+# Email validation
+email-validator = "^2.3.0"
+
+# Multipart/form-data
+python-multipart = "^0.0.20"
+
+# Serialization
+orjson = "^3.11.3"
+
+# HTTP client
+httpx = "^0.28.1"
+
+# Logging
+structlog = "^25.4.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-asyncio = "^1.1.0"
+pytest-cov = "^7.0.0"
+
+ruff = "^0.12.9"
+mypy = "^1.17.1"
+
+pre-commit = "^4.3.0"
+
+faker = "^37.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+#######################################################
+
+[tool.ruff]
+
+line-length = 88
+
+target-version = "py314"
+
+#######################################################
+
+[tool.ruff.lint]
+
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+]
+
+#######################################################
+
+[tool.ruff.format]
+
+quote-style = "double"
+
+indent-style = "space"
+
+#######################################################
+
+[tool.pytest.ini_options]
+
+asyncio_mode = "auto"
+
+testpaths = [
+    "tests",
+]
+
+#######################################################
+
+[tool.coverage.run]
+
+branch = true
+
+source = [
+    "app",
+]

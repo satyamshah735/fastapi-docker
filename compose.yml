@@ -1,0 +1,201 @@
+name: fastapi-template
+
+networks:
+  fastapi-network:
+    name: fastapi-network
+    driver: bridge
+    external: true
+
+volumes:
+
+  postgres-data:
+
+  redis-data:
+
+  mailpit-data:
+
+x-common-env: &common-env
+
+  APP_NAME: FastAPI Template
+
+  ENVIRONMENT: development
+
+  DEBUG: "true"
+
+  DATABASE_URL: postgresql+asyncpg://fastapi_user:fastapi_password@postgres-server:5432/fastapi_db
+
+  REDIS_URL: redis://:redispassword@redis-server:6379/0
+
+services:
+
+############################################################
+
+  api-server:
+
+    build:
+      context: .
+      dockerfile: .docker/fastapi/Dockerfile
+
+      args:
+        APPLICATION_UID: ${APPLICATION_UID:-1000}
+        APPLICATION_GID: ${APPLICATION_GID:-1000}
+
+    image: fastapi-template:latest
+
+    container_name: fastapi-api
+
+    working_dir: /app
+
+    volumes:
+
+      - .:/app
+
+    env_file:
+
+      - .env
+
+    environment:
+
+      <<: *common-env
+
+    ports:
+
+      - "8080:8080"
+
+    depends_on:
+
+      postgres-server:
+
+        condition: service_healthy
+
+      redis-server:
+
+        condition: service_healthy
+
+    networks:
+
+      - fastapi-network
+
+    healthcheck:
+
+      test: ["CMD","curl","-f","http://localhost:8080/health"]
+
+      interval: 30s
+
+      timeout: 5s
+
+      retries: 5
+
+    restart: unless-stopped
+
+############################################################
+
+  postgres-server:
+
+    image: postgres:17
+
+    container_name: fastapi-postgres
+
+    environment:
+
+      POSTGRES_DB: fastapi_db
+
+      POSTGRES_USER: fastapi_user
+
+      POSTGRES_PASSWORD: fastapi_password
+
+    volumes:
+
+      - postgres-data:/var/lib/postgresql/data
+
+    ports:
+
+      - "5432:5432"
+
+    healthcheck:
+
+      test: ["CMD-SHELL","pg_isready -U fastapi_user -d fastapi_db"]
+
+      interval: 10s
+
+      timeout: 5s
+
+      retries: 5
+
+    restart: unless-stopped
+
+    networks:
+
+      - fastapi-network
+
+############################################################
+
+  redis-server:
+
+    image: redis:8
+
+    container_name: fastapi-redis
+
+    command:
+
+      - redis-server
+
+      - --appendonly
+
+      - yes
+
+      - --requirepass
+
+      - redispassword
+
+    ports:
+
+      - "6379:6379"
+
+    volumes:
+
+      - redis-data:/data
+
+    healthcheck:
+
+      test:
+
+        - CMD
+
+        - redis-cli
+
+        - -a
+
+        - redispassword
+
+        - ping
+
+    restart: unless-stopped
+
+    networks:
+
+      - fastapi-network
+
+############################################################
+
+  mailpit-server:
+
+    image: axllent/mailpit
+
+    container_name: fastapi-mailpit
+
+    ports:
+
+      - "1025:1025"
+
+      - "8025:8025"
+
+    volumes:
+
+      - mailpit-data:/data
+
+    restart: unless-stopped
+
+    networks:
+
+      - fastapi-network
