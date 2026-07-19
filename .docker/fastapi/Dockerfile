@@ -38,7 +38,7 @@ WORKDIR /app
 
 RUN python -m venv ${VIRTUAL_ENV}
 
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock* ./
 
 RUN poetry config virtualenvs.in-project true
 
@@ -46,14 +46,14 @@ RUN touch README.md
 
 RUN poetry install
 
-COPY . .
+COPY .docker/fastapi/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN chmod +x .docker/fastapi/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 USER appuser
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/tini", "--", "bash", ".docker/fastapi/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "bash", "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
