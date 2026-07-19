@@ -42,8 +42,6 @@ COPY pyproject.toml poetry.lock* ./
 
 RUN poetry config virtualenvs.in-project true
 
-RUN touch README.md
-
 RUN poetry install
 
 COPY .docker/fastapi/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
