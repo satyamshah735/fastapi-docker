@@ -10,10 +10,13 @@ ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VERSION=2.2.1
 ENV POETRY_NO_INTERACTION=1
 
-ENV VIRTUAL_ENV=/home/appuser/.venv
+# Store the virtual environment inside the project
+ENV VIRTUAL_ENV=/app/.venv
 
+# Make Poetry and the virtual environment available
 ENV PATH="${VIRTUAL_ENV}/bin:${POETRY_HOME}/bin:${PATH}"
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     gcc \
@@ -24,8 +27,10 @@ RUN apt-get update && apt-get install -y \
     tini \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
+# Create non-root user
 RUN groupadd \
         --gid ${APPLICATION_GID} appuser \
  && useradd \
@@ -34,20 +39,18 @@ RUN groupadd \
         --create-home \
         appuser
 
-COPY .docker/fastapi/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+# Copy entrypoint
+COPY .docker/dev/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Switch to non-root
+# Switch to non-root user
 USER appuser
 
 WORKDIR /app
 
-RUN python -m venv ${VIRTUAL_ENV}
-
+# Copy dependency files
 COPY pyproject.toml poetry.lock* ./
-
-RUN poetry install
 
 EXPOSE 8080
 

@@ -34,7 +34,7 @@ services:
 
     build:
       context: .
-      dockerfile: .docker/fastapi/Dockerfile
+      dockerfile: .docker/dev/Dockerfile
 
       args:
         APPLICATION_UID: ${APPLICATION_UID:-1000}
@@ -51,6 +51,7 @@ services:
       - ./app:/app/app
       - ./pyproject.toml:/app/pyproject.toml
       - ./poetry.lock:/app/poetry.lock
+      - ./.venv:/app/.venv
 
     env_file:
 

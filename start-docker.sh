@@ -33,6 +33,14 @@ start)
 
 docker network create ${NETWORK_NAME} >/dev/null 2>&1 || true
 
+echo "Preparing .venv..."
+
+if [[ ! -d ".venv" ]]; then
+
+    mkdir .venv
+
+fi
+
 echo "Building..."
 
 ${COMPOSE} build \
@@ -57,9 +65,11 @@ ${COMPOSE} down --remove-orphans
 
 restart)
 
-${COMPOSE} down
+echo "Restarting..."
 
-${COMPOSE} up --build
+${COMPOSE} down --remove-orphans
+
+exec bash "$0" start
 
 ;;
 
