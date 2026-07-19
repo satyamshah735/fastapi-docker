@@ -34,21 +34,20 @@ RUN groupadd \
         --create-home \
         appuser
 
+COPY .docker/fastapi/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Switch to non-root
+USER appuser
+
 WORKDIR /app
 
 RUN python -m venv ${VIRTUAL_ENV}
 
 COPY pyproject.toml poetry.lock* ./
 
-RUN poetry config virtualenvs.in-project true
-
 RUN poetry install
-
-COPY .docker/fastapi/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-USER appuser
 
 EXPOSE 8080
 
